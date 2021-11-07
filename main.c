@@ -18,35 +18,32 @@ struct pop_entry {
 
 // read data from csv file to another file
 void read_csv(){
- char * lines[24];
+ char * lines[25];
  int fd = open ("pop.csv", O_RDONLY);
  char big_str[1000];
- 
+
  read(fd, big_str, 1000);
- 
- printf("big_str: %s\n", big_str);
- 
- char * split;
- int i = 0;
- 
- while ((split = strchr(big_str, '\n'))!= NULL){
- 	split = NULL;
+
+ //printf("big_str: %s\n", big_str);
+// split into lines
+ char * split = big_str;
+ int i = 1;
+ lines[0] = split;
+ while ((split = strchr(split, '\n'))!= NULL){
+ 	* split = '\0';
  	lines[i] = ++split;
  	i++;
  }
- 
- /**test*/
+
+
+
+ /**test
  for(i=0;i<24;i++){
- char * test = lines[i];
- printf("lines [%d]: ",i);
- 
- while(test!= NULL){
- //printf("%c", *test);
- test++;
+ char test [100];
+ strcpy(test,lines[i]);
+ printf("lines [%d]: %s\n ",i,test);
  }
- 
- printf("\n");
- }
+*/
 
 }
 
@@ -60,7 +57,7 @@ void add_data(){
 }
 
 
-// update a entry in data, prints data in terminal and 
+// update a entry in data, prints data in terminal and
 // ask user to choose an entry they want to update
 
 void update_data(){
