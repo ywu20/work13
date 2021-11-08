@@ -50,24 +50,11 @@ close(fd);
 
  split_str(split, '\n', lines);
 int i = 0;
- /**test
- for(i=0;i<24;i++){
- char test [100];
- strcpy(test,lines[i]);
- printf("lines [%d]: %s\n ",i,test);
- }
-*/
+
 split = lines[0];
 char * boro [6];
 split_str(split,',',boro);
 
-/*
-for(i=0;i<6;i++){
-char test [100];
-strcpy(test,boro[i]);
-printf("boro [%d]: %s\n ",i,test);
-}
-*/
 
 //populate into struct array
 struct pop_entry pop[5*23+1];
@@ -83,7 +70,7 @@ for(j=1;j<6;j++){
 pop[pop_i].year = atoi(entry[0]);
 pop[pop_i].population = atoi(entry[j]);
 strcpy(pop[pop_i].boro , boro[j]);
-print_pop_entry(&pop[pop_i]);
+//print_pop_entry(&pop[pop_i]);
 pop_i++;
 }
 }
@@ -94,25 +81,7 @@ int a = write(fd, pop, sizeof(pop)-sizeof(struct pop_entry));
 //* test write
 printf("wrote %d bytes to struct_pop\n", a);
 close(fd);
-/*
-print_err();
-fd = open("struct_pop", O_RDONLY);
-printf("%d\n",fd);
-print_err();
 
-//lseek(fd,0,SEEK_SET);
-struct pop_entry ** test_pop=calloc(5*23+1, sizeof(struct pop_entry * ));
-print_err();
-a = read(fd, test_pop, 5*23 * sizeof(struct pop_entry));
-print_err();
-printf("bytes read: %d\n", a);
-for(i = 0;i<5*23;i++){
-  print_pop_entry(test_pop[i]);
-}
-
-close(fd);
-*/
-//free_struct(pop);
 }
 
 // read data from csv, display it in the terminal
@@ -233,11 +202,13 @@ update.population = atoi(population);
 
 }
 int main(int argc, char * argv[]){
-read_csv();
-read_data();
-//add_data();
-update_data();
-read_data();
+  if(argc != 1){
+    if(strcmp("-read_csv", argv[1]) == 0) read_csv();
+    else if (strcmp("-read_data", argv[1])==0) read_data();
+    else if (strcmp("-add_data", argv[1])==0) add_data();
+    else if (strcmp("-update_data", argv[1])==0) update_data();
+}
+
 
  return 0;
 }
