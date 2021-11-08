@@ -181,29 +181,37 @@ close(fd);
 void read_data(){
 struct stat file;
 stat("struct_pop",&file);
-int fd = open("struct_pop", O_RDONLY);
+int fd = open("struct_pop", O_RDWR);
+
 //struct pop_entry pop[file.st_size/sizeof(struct pop_entry)];
 struct pop_entry *pop = calloc (1, sizeof(struct pop_entry)+file.st_size);
 print_err();
+lseek(fd, 0, SEEK_SET);
 int a = read(fd, pop, file.st_size);
 print_err();
 printf("bytes read: %d\n", a);
 int i;
 for(i = 0;i<file.st_size/sizeof(struct pop_entry)-1;i++){
   printf("%d: ",i);
-  print_pop_entry(&pop[i]);
+  print_pop_entry(&(pop[i]));
 }
+
+
+
+close(fd);
 free(pop);
 }
 
 // add data to the data file with appending
 void add_data(){
+
   printf("Enter year boro pop:\n");
   char data[100];
   fgets(data, sizeof(data),stdin);
   printf("data: %s\n", data);
   char *data_arr[3];
   split_str(data,' ',data_arr);
+
   int fd = open("struct_pop", O_WRONLY|O_APPEND);
 
   struct pop_entry appnd;
@@ -221,8 +229,13 @@ void add_data(){
 appnd.year =  atoi(yr);
 
 appnd.population = atoi(pop);
+/*
 //print_pop_entry(&appnd);
-  int a = write(fd, &appnd,sizeof(appnd));
+appnd.year = 2020;
+strcpy (appnd.boro, "Bronx");
+appnd.population = 1;
+*/
+  int a = write(fd, &appnd, sizeof(struct pop_entry));
   printf("bytes written: %d\n", a);
   print_err();
 
@@ -237,21 +250,58 @@ appnd.population = atoi(pop);
 void update_data(){
   read_data();
   struct pop_entry pop [1000];
-  int fd = open("struct_pop", O_RDWR);
+  int fd = open("struct_pop", O_RDWR|O_TRUNC);
   struct stat file;
   stat("struct_pop",&file);
   int a = read(fd, pop, file.st_size);
-  printf("bytes read: %d",a);
+  printf("bytes read: %d\n",a);
+
 
   printf("Entry to update: \n");
-  char entry[5];
-  fgets(entry, 4, stdin);
+  char entry[100];
+  fgets(entry, 100, stdin);
+  int index = atoi(entry);
+
+  printf("Enter year boro pop:\n");
+  char data[100];
+  fgets(data, sizeof(data),stdin);
+  print_err();
+  printf("data: %s\n", data);
+  char *data_arr[3];
+  split_str(data,' ',data_arr);
+
+
+  struct pop_entry update;
+
+  char yr [16];
+  strcpy(yr, data_arr[0]);
+  //printf("year: %s\n", yr);
+  char boro[15];
+  strcpy(update.boro, data_arr[1]);
+  //printf("boro: %s\n", boro);
+  char population[16];
+  strcpy(population, data_arr[2]);
+//  printf("pop: %s\n", pop);
+
+update.year =  atoi(yr);
+
+update.population = atoi(population);
+
+
+  lseek(fd, index * sizeof(struct pop_entry), SEEK_SET);
+
+  a = write(fd, &update, sizeof(struct pop_entry));
+  printf("bytes written: %d\n",a);
+
+  close(fd);
+
 }
 int main(int argc, char * argv[]){
 read_csv();
 read_data();
-//add_data();
+add_data();
 update_data();
-//read_data();
+read_data();
+
  return 0;
 }
