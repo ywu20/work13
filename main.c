@@ -34,68 +34,6 @@ void print_err(){
   if(errno != 0) printf("%s\n",strerror(errno));
 }
 
-struct pop_entry ** init_struct(){
-  char * lines[25];
-  int fd = open ("pop.csv", O_RDONLY);
-  char big_str[1000];
-
-  read(fd, big_str, 1000);
- close(fd);
-
-  //printf("big_str: %s\n", big_str);
- // split into lines
-  char * split = big_str;
-
-  split_str(split, '\n', lines);
- int i = 0;
-  /**test
-  for(i=0;i<24;i++){
-  char test [100];
-  strcpy(test,lines[i]);
-  printf("lines [%d]: %s\n ",i,test);
-  }
- */
- split = lines[0];
- char * boro [6];
- split_str(split,',',boro);
-
- /*
- for(i=0;i<6;i++){
- char test [100];
- strcpy(test,boro[i]);
- printf("boro [%d]: %s\n ",i,test);
- }
- */
-
- //populate into struct array
- struct pop_entry ** pop  = calloc(5*23+1, sizeof(struct pop_entry * ));
-
- int pop_i = 0;
- for(i=1;i<24;i++){
- split = lines[i];
- char * entry [6];
- split_str(split, ',', entry);
- int j;
- for(j=1;j<6;j++){
- pop[pop_i] = malloc(sizeof(struct pop_entry));
- pop[pop_i]->year = atoi(entry[0]);
- pop[pop_i] -> population = atoi(entry[j]);
- strcpy(pop[pop_i] -> boro , boro[j]);
- //print_pop_entry(pop[pop_i]);
- pop_i++;
- }
- }
-
- return pop;
-}
-
-void free_struct(struct pop_entry ** pop){
-  int i;
-  for(i=0;i< 5*23+1;i++){
-    free(pop[i]);
-  }
-  free(pop);
-}
 // read data from csv file to another file
 void read_csv(){
  //struct pop_entry pop[5*23+1]= init_struct();
@@ -181,7 +119,7 @@ close(fd);
 void read_data(){
 struct stat file;
 stat("struct_pop",&file);
-int fd = open("struct_pop", O_RDWR);
+int fd = open("struct_pop", O_RDONLY);
 
 //struct pop_entry pop[file.st_size/sizeof(struct pop_entry)];
 struct pop_entry *pop = calloc (1, sizeof(struct pop_entry)+file.st_size);
@@ -244,10 +182,13 @@ void add_data(){
 
 void update_data(){
   read_data();
+
   struct pop_entry pop [1000];
-  int fd = open("struct_pop", O_RDWR|O_TRUNC);
+  int fd = open("struct_pop", O_RDWR);
   struct stat file;
   stat("struct_pop",&file);
+  //lseek(fd, 0, SEEK_SET);
+
   int a = read(fd, pop, file.st_size);
   printf("bytes read: %d\n",a);
 
@@ -294,8 +235,8 @@ update.population = atoi(population);
 int main(int argc, char * argv[]){
 read_csv();
 read_data();
-add_data();
-//update_data();
+//add_data();
+update_data();
 read_data();
 
  return 0;
