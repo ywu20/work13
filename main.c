@@ -150,9 +150,9 @@ pop_i++;
 }
 }
 
-fd = open("struct_pop", O_CREAT | O_TRUNC |O_RDWR, 0644);
+fd = open("struct_pop", O_CREAT | O_TRUNC |O_RDWR, 0777);
 
-int a = write(fd, pop, sizeof(pop));
+int a = write(fd, pop, sizeof(pop)-sizeof(struct pop_entry));
 //* test write
 printf("wrote %d bytes to struct_pop\n", a);
 close(fd);
@@ -191,7 +191,7 @@ int a = read(fd, pop, file.st_size);
 print_err();
 printf("bytes read: %d\n", a);
 int i;
-for(i = 0;i<file.st_size/sizeof(struct pop_entry)-1;i++){
+for(i = 0;i<file.st_size/sizeof(struct pop_entry);i++){
   printf("%d: ",i);
   print_pop_entry(&(pop[i]));
 }
@@ -205,41 +205,36 @@ free(pop);
 // add data to the data file with appending
 void add_data(){
 
-  printf("Enter year boro pop:\n");
-  char data[100];
-  fgets(data, sizeof(data),stdin);
-  printf("data: %s\n", data);
-  char *data_arr[3];
-  split_str(data,' ',data_arr);
+    printf("Enter year boro pop:\n");
+    char data[100];
+    fgets(data, sizeof(data),stdin);
+    printf("data: %s\n", data);
+    char *data_arr[3];
+    split_str(data,' ',data_arr);
 
-  int fd = open("struct_pop", O_WRONLY|O_APPEND);
+    int fd = open("struct_pop", O_WRONLY|O_APPEND);
 
-  struct pop_entry appnd;
+    struct pop_entry appnd;// = malloc(sizeof(struct pop_entry));
 
-  char yr [16];
-  strcpy(yr, data_arr[0]);
-  //printf("year: %s\n", yr);
-  char boro[15];
-  strcpy(appnd.boro, data_arr[1]);
-  //printf("boro: %s\n", boro);
-  char pop[16];
-  strcpy(pop, data_arr[2]);
-//  printf("pop: %s\n", pop);
+    char yr [16];
+    strcpy(yr, data_arr[0]);
+    //printf("year: %s\n", yr);
+    char boro[15];
+    strcpy(appnd.boro, data_arr[1]);
+    //printf("boro: %s\n", boro);
+    char pop[16];
+    strcpy(pop, data_arr[2]);
+  //  printf("pop: %s\n", pop);
 
-appnd.year =  atoi(yr);
+  appnd.year =  atoi(yr);
 
-appnd.population = atoi(pop);
-/*
-//print_pop_entry(&appnd);
-appnd.year = 2020;
-strcpy (appnd.boro, "Bronx");
-appnd.population = 1;
-*/
-  int a = write(fd, &appnd, sizeof(struct pop_entry));
-  printf("bytes written: %d\n", a);
-  print_err();
+  appnd.population = atoi(pop);
 
-  close(fd);
+    int a = write(fd, &appnd, sizeof(struct pop_entry));
+    printf("bytes written: %d\n", a);
+    print_err();
+
+    close(fd);
 
 }
 
@@ -300,7 +295,7 @@ int main(int argc, char * argv[]){
 read_csv();
 read_data();
 add_data();
-update_data();
+//update_data();
 read_data();
 
  return 0;
